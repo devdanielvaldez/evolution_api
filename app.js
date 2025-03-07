@@ -2,9 +2,11 @@ const express = require('express');
 const fs = require('fs');
 const csv = require('csv-parser');
 const { config } = require('dotenv');
+const cors = require('cors');
 config();
 
 const app = express();
+app.use(cors());
 const PORT = process.env.PORT;
 const CSV_FILE_PATH = 'data.csv';
 const JSON_FILE_PATH = 'data.json';
