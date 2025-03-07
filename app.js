@@ -82,7 +82,7 @@ app.get('/get-info/:email', (req, res) => {
         })
         .on('end', () => {
             if (nombreLider) {
-                res.json({ numeroIBO: entry.numeroIBO, liderIBO: entry.liderIBO, nombreLider });
+                res.json({ numeroIBO: entry.numeroIBO, liderIBO: entry.liderIBO, nombreLider, auspiciador: entry.auspiciador });
             } else {
                 res.status(404).json({ error: 'NombreLider no encontrado en el CSV' });
             }
