@@ -5,7 +5,7 @@ const { config } = require('dotenv');
 config();
 
 const app = express();
-const PORT = 3000 || process.env.PORT;
+const PORT = process.env.PORT;
 const CSV_FILE_PATH = 'data.csv';
 const JSON_FILE_PATH = 'data.json';
 
