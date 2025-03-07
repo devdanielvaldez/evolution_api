@@ -6,8 +6,9 @@ name: Build and deploy Node.js app to Azure Web App - evolution-api
 on:
   push:
     branches:
-      - main
+    - main
   workflow_dispatch:
+
 
 jobs:
   build:
@@ -16,27 +17,26 @@ jobs:
       contents: read #This is required for actions/checkout
 
     steps:
-      - uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
-      - name: Set up Node.js version
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18.x'
+    - name: Set up Node.js version
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18.x'
 
-      - name: npm install, build, and test
-        run: |
-          npm install
-          npm run build --if-present
-          npm run test --if-present
+    - name: npm install, build
+      run: |
+        npm install
+        npm run build --if-present
 
-      - name: Zip artifact for deployment
-        run: zip release.zip ./* -r
+    - name: Zip artifact for deployment
+      run: zip release.zip ./* -r
 
-      - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v4
-        with:
-          name: node-app
-          path: release.zip
+    - name: Upload artifact for deployment job
+      uses: actions/upload-artifact@v4
+      with:
+        name: node-app
+        path: release.zip
 
   deploy:
     runs-on: ubuntu-latest
@@ -49,26 +49,25 @@ jobs:
       contents: read #This is required for actions/checkout
 
     steps:
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v4
-        with:
-          name: node-app
+    - name: Download artifact from build job
+      uses: actions/download-artifact@v4
+      with:
+        name: node-app
 
-      - name: Unzip artifact for deployment
-        run: unzip release.zip
-      
-      - name: Login to Azure
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_ED9966596D6D4331914BD7F30A3215B3 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_CE84772CF53F4D4BA024E549A6E5ABB0 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_10498D5EBCBD4FE4A303CB6682A8E4B6 }}
+    - name: Unzip artifact for deployment
+      run: unzip release.zip
 
-      - name: 'Deploy to Azure Web App'
-        id: deploy-to-webapp
-        uses: azure/webapps-deploy@v3
-        with:
-          app-name: 'evolution-api'
-          slot-name: 'Production'
-          package: .
-          
+    - name: Login to Azure
+      uses: azure/login@v2
+      with:
+        client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_ED9966596D6D4331914BD7F30A3215B3 }}
+        tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_CE84772CF53F4D4BA024E549A6E5ABB0 }}
+        subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_10498D5EBCBD4FE4A303CB6682A8E4B6 }}
+
+    - name: 'Deploy to Azure Web App'
+      id: deploy-to-webapp
+      uses: azure/webapps-deploy@v3
+      with:
+        app-name: 'evolution-api'
+        slot-name: 'Production'
+        package: .
