@@ -1,9 +1,11 @@
 const express = require('express');
 const fs = require('fs');
 const csv = require('csv-parser');
+const { config } = require('dotenv');
+config();
 
 const app = express();
-const PORT = 3000;
+const PORT = 3000 || process.env.PORT;
 const CSV_FILE_PATH = 'data.csv';
 const JSON_FILE_PATH = 'data.json';
 
