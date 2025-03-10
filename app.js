@@ -54,13 +54,33 @@ app.post('/validate', async (req, res) => {
             return res.json({ found: false });
         }
 
+        // Cargar datos existentes
         let data = [];
         if (fs.existsSync(JSON_FILE_PATH)) {
             const fileContent = fs.readFileSync(JSON_FILE_PATH);
             data = JSON.parse(fileContent);
+            
+            // Contar cuántos usuarios ya tienen este numeroIBO
+            const usersWithSameIBO = data.filter(user => user.numeroIBO === numeroIBO);
+            if (usersWithSameIBO.length >= 2) {
+                return res.status(400).json({ 
+                    error: 'Validación fallida', 
+                    details: 'Ya existen 2 usuarios registrados con este número de IBO. No se permiten más registros.' 
+                });
+            }
         }
 
-        data.push({ numeroIBO, liderIBO, email, auspiciador: auspi, isActive: false, phone: phone, pay: false, paymentPlan: "" });
+        // Si llegamos aquí, es válido agregar un nuevo usuario
+        data.push({ 
+            numeroIBO, 
+            liderIBO, 
+            email, 
+            auspiciador: auspi, 
+            isActive: false, 
+            phone: phone, 
+            pay: false, 
+            paymentPlan: "" 
+        });
         fs.writeFileSync(JSON_FILE_PATH, JSON.stringify(data, null, 2));
 
         res.json({ found: true });
