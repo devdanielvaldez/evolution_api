@@ -32,7 +32,7 @@ const validateIBOs = (numeroIBO, liderIBO) => {
 };
 
 app.post('/validate', async (req, res) => {
-    const { numeroIBO, liderIBO, email, auspi } = req.body;
+    const { numeroIBO, liderIBO, email, auspi, phone } = req.body;
     if (!numeroIBO || !liderIBO || !email) {
         return res.status(400).json({ error: 'Faltan parámetros' });
     }
@@ -49,7 +49,7 @@ app.post('/validate', async (req, res) => {
             data = JSON.parse(fileContent);
         }
 
-        data.push({ numeroIBO, liderIBO, email, auspiciador: auspi, isActive: false });
+        data.push({ numeroIBO, liderIBO, email, auspiciador: auspi, isActive: false, phone: phone });
         fs.writeFileSync(JSON_FILE_PATH, JSON.stringify(data, null, 2));
 
         res.json({ found: true });
