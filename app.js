@@ -12,16 +12,17 @@ const PORT = process.env.PORT;
 const CSV_FILE_PATH = 'data.csv';
 const JSON_FILE_PATH = 'data.json';
 const SUCCESS_REDIRECT_URL = process.env.SUCCESS_REDIRECT_URL;
+const PRICES_JSON_PATH = 'prices.json';
 
 app.use(express.json());
 
 app.use((req, res, next) => {
     if (req.originalUrl === '/webhook') {
-      next();
+        next();
     } else {
-      express.json()(req, res, next);
+        express.json()(req, res, next);
     }
-  });
+});
 
 const validateIBOs = (numeroIBO, liderIBO) => {
     return new Promise((resolve, reject) => {
@@ -113,7 +114,7 @@ app.post('/activate', (req, res) => {
     try {
         const data = JSON.parse(fs.readFileSync(JSON_FILE_PATH));
         const userIndex = data.findIndex(item => item.email === email);
-        
+
         if (userIndex === -1) {
             return res.status(404).json({ error: 'Usuario no encontrado' });
         }
@@ -131,8 +132,8 @@ app.post('/activate', (req, res) => {
 app.get('/is-active/:email', (req, res) => {
     const email = req.params.email;
 
-    if(email == 'gruposerulle@gmail.com') return res.status(200).json({ isActive: true });
-    
+    if (email == 'gruposerulle@gmail.com') return res.status(200).json({ isActive: true });
+
     if (!fs.existsSync(JSON_FILE_PATH)) {
         return res.status(404).json({ error: 'No hay datos almacenados' });
     }
@@ -140,7 +141,7 @@ app.get('/is-active/:email', (req, res) => {
     try {
         const data = JSON.parse(fs.readFileSync(JSON_FILE_PATH));
         const user = data.find(item => item.email === email);
-        
+
         if (!user) {
             return res.status(404).json({ error: 'Usuario no encontrado' });
         }
@@ -151,104 +152,155 @@ app.get('/is-active/:email', (req, res) => {
     }
 });
 
-app.post('/create-payment', async (req, res) => {
-    const { email } = req.body;
+app.get('/payment-callback', async (req, res) => {
+    const { session_id, email, plan } = req.query;
     
-    if (!email) {
-      return res.status(400).json({ error: 'Falta el parámetro email' });
+    if (!session_id || !email || !plan) {
+        return res.status(400).json({ error: 'Parámetros insuficientes' });
     }
     
     try {
-      if (!fs.existsSync(JSON_FILE_PATH)) {
-        return res.status(404).json({ error: 'No hay datos almacenados' });
-      }
-      
-      const data = JSON.parse(fs.readFileSync(JSON_FILE_PATH));
-      const user = data.find(item => item.email === email);
-      
-      if (!user) {
-        return res.status(404).json({ error: 'Usuario no encontrado' });
-      }
-      
-      const session = await stripe.checkout.sessions.create({
-        payment_method_types: ['card'],
-        line_items: [
-          {
-            price_data: {
-              currency: 'usd',
-              product_data: {
-                name: 'Membresía Evolution',
-                description: 'Pago de membresía para acceso completo',
-              },
-              unit_amount: 2000,
-            },
-            quantity: 1,
-          },
-        ],
-        mode: 'payment',
-        success_url: `${process.env.DOMAIN}/payment-callback?session_id={CHECKOUT_SESSION_ID}&email=${email}`,
-        cancel_url: `${process.env.DOMAIN}/cancel`,
-        metadata: {
-          email: email,
-        },
-      });
-      
-      res.json({ url: session.url });
-    } catch (error) {
-      res.status(500).json({ error: 'Error procesando la solicitud', details: error.message });
-    }
-  });
-
-  app.get('/payment-callback', async (req, res) => {
-    const { session_id, email } = req.query;
-    
-    if (!session_id || !email) {
-      return res.status(400).json({ error: 'Parámetros insuficientes' });
-    }
-    
-    try {
-      const session = await stripe.checkout.sessions.retrieve(session_id);
-      
-      if (session.payment_status === 'paid') {
-        if (fs.existsSync(JSON_FILE_PATH)) {
-          const data = JSON.parse(fs.readFileSync(JSON_FILE_PATH));
-          const userIndex = data.findIndex(item => item.email === email);
-          
-          if (userIndex !== -1) {
-            data[userIndex].pay = true;
-            fs.writeFileSync(JSON_FILE_PATH, JSON.stringify(data, null, 2));
-            
-            return res.redirect(SUCCESS_REDIRECT_URL);
-          }
+        const session = await stripe.checkout.sessions.retrieve(session_id);
+        
+        if (session.payment_status === 'paid') {
+            if (fs.existsSync(JSON_FILE_PATH)) {
+                const data = JSON.parse(fs.readFileSync(JSON_FILE_PATH));
+                const userIndex = data.findIndex(item => item.email === email);
+                
+                if (userIndex !== -1) {
+                    data[userIndex].pay = true;
+                    data[userIndex].planType = plan;
+                    data[userIndex].paymentDate = new Date().toISOString();
+                    fs.writeFileSync(JSON_FILE_PATH, JSON.stringify(data, null, 2));
+                    
+                    return res.redirect(SUCCESS_REDIRECT_URL);
+                }
+            }
         }
-      }
-      
-      res.status(400).json({ error: 'No se pudo verificar el pago o actualizar el usuario' });
+        
+        res.status(400).json({ error: 'No se pudo verificar el pago o actualizar el usuario' });
     } catch (error) {
-      res.status(500).json({ error: 'Error procesando la solicitud', details: error.message });
+        res.status(500).json({ error: 'Error procesando la solicitud', details: error.message });
     }
-  });
-  
-  app.get('/is-paid/:email', (req, res) => {
+});
+
+app.get('/is-paid/:email', (req, res) => {
     const email = req.params.email;
-      
+
     if (!fs.existsSync(JSON_FILE_PATH)) {
-      return res.status(404).json({ error: 'No hay datos almacenados' });
+        return res.status(404).json({ error: 'No hay datos almacenados' });
     }
-  
+
     try {
-      const data = JSON.parse(fs.readFileSync(JSON_FILE_PATH));
-      const user = data.find(item => item.email === email);
-      
-      if (!user) {
-        return res.status(404).json({ error: 'Usuario no encontrado' });
-      }
-  
-      res.json({ paid: user.pay });
+        const data = JSON.parse(fs.readFileSync(JSON_FILE_PATH));
+        const user = data.find(item => item.email === email);
+
+        if (!user) {
+            return res.status(404).json({ error: 'Usuario no encontrado' });
+        }
+
+        res.json({ paid: user.pay });
     } catch (error) {
-      res.status(500).json({ error: 'Error procesando la solicitud', details: error.message });
+        res.status(500).json({ error: 'Error procesando la solicitud', details: error.message });
     }
-  });
+});
+
+app.post('/set-prices', (req, res) => {
+    const { monthlyPrice, yearlyPrice } = req.body;
+
+    if (!monthlyPrice || !yearlyPrice) {
+        return res.status(400).json({ error: 'Faltan los precios mensuales o anuales' });
+    }
+
+    try {
+        // Los precios deben estar en centavos para Stripe
+        const prices = {
+            monthly: Math.round(monthlyPrice * 100),
+            yearly: Math.round(yearlyPrice * 100)
+        };
+
+        fs.writeFileSync(PRICES_JSON_PATH, JSON.stringify(prices, null, 2));
+        res.json({ success: true, message: 'Precios actualizados correctamente' });
+    } catch (error) {
+        res.status(500).json({ error: 'Error al guardar los precios', details: error.message });
+    }
+});
+
+app.get('/get-prices', (req, res) => {
+    try {
+        if (!fs.existsSync(PRICES_JSON_PATH)) {
+            return res.status(404).json({ error: 'No hay precios establecidos' });
+        }
+
+        const prices = JSON.parse(fs.readFileSync(PRICES_JSON_PATH));
+        // Convertir de centavos a dólares para la respuesta
+        res.json({
+            monthly: prices.monthly / 100,
+            yearly: prices.yearly / 100
+        });
+    } catch (error) {
+        res.status(500).json({ error: 'Error al obtener los precios', details: error.message });
+    }
+});
+
+app.post('/create-payment', async (req, res) => {
+    const { email, plan } = req.body; // Agregar plan como parámetro (monthly o yearly)
+
+    if (!email || !plan) {
+        return res.status(400).json({ error: 'Faltan parámetros (email o plan)' });
+    }
+
+    try {
+        // Verificar usuario
+        if (!fs.existsSync(JSON_FILE_PATH)) {
+            return res.status(404).json({ error: 'No hay datos almacenados' });
+        }
+
+        const data = JSON.parse(fs.readFileSync(JSON_FILE_PATH));
+        const user = data.find(item => item.email === email);
+
+        if (!user) {
+            return res.status(404).json({ error: 'Usuario no encontrado' });
+        }
+
+        // Obtener precios
+        if (!fs.existsSync(PRICES_JSON_PATH)) {
+            return res.status(404).json({ error: 'No hay precios establecidos' });
+        }
+
+        const prices = JSON.parse(fs.readFileSync(PRICES_JSON_PATH));
+        const amount = plan === 'monthly' ? prices.monthly : prices.yearly;
+        const planName = plan === 'monthly' ? 'Mensual' : 'Anual';
+
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            line_items: [
+                {
+                    price_data: {
+                        currency: 'usd',
+                        product_data: {
+                            name: `Membresía Evolution ${planName}`,
+                            description: `Pago de membresía ${planName} para acceso completo`,
+                        },
+                        unit_amount: amount,
+                    },
+                    quantity: 1,
+                },
+            ],
+            mode: 'payment',
+            success_url: `${process.env.DOMAIN}/payment-callback?session_id={CHECKOUT_SESSION_ID}&email=${email}&plan=${plan}`,
+            cancel_url: `${process.env.DOMAIN}/cancel`,
+            metadata: {
+                email: email,
+                plan: plan
+            },
+        });
+
+        res.json({ url: session.url });
+    } catch (error) {
+        res.status(500).json({ error: 'Error procesando la solicitud', details: error.message });
+    }
+});
 
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en http://localhost:${PORT}`);
