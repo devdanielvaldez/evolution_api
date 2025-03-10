@@ -11,7 +11,7 @@ app.use(cors());
 const PORT = process.env.PORT;
 const CSV_FILE_PATH = 'data.csv';
 const JSON_FILE_PATH = 'data.json';
-const SUCCESS_REDIRECT_URL = process.env.SUCCESS_REDIRECT_URL || 'https://example.com/success';
+const SUCCESS_REDIRECT_URL = process.env.SUCCESS_REDIRECT_URL;
 
 app.use(express.json());
 
