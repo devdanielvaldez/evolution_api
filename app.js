@@ -3,8 +3,8 @@ const fs = require('fs');
 const csv = require('csv-parser');
 const { config } = require('dotenv');
 const cors = require('cors');
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 config();
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const app = express();
 app.use(cors());
