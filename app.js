@@ -60,7 +60,7 @@ app.post('/validate', async (req, res) => {
             data = JSON.parse(fileContent);
         }
 
-        data.push({ numeroIBO, liderIBO, email, auspiciador: auspi, isActive: false, phone: phone, pay: false });
+        data.push({ numeroIBO, liderIBO, email, auspiciador: auspi, isActive: false, phone: phone, pay: false, paymentPlan: "" });
         fs.writeFileSync(JSON_FILE_PATH, JSON.stringify(data, null, 2));
 
         res.json({ found: true });

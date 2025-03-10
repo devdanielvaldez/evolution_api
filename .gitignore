@@ -1,2 +1,7 @@
 ./node_modules
 node_modules
+./data.json
+./prices.json
+
+data.json
+prices.json
