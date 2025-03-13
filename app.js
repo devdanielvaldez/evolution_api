@@ -339,9 +339,6 @@ app.post('/add-success-story', (req, res) => {
     }
 
     let stories = readSuccessStories();
-    if (stories.length >= 2) {
-        return res.status(400).json({ error: 'Solo se pueden almacenar 2 historias de éxito.' });
-    }
 
     stories.push({ title, videoUrl });
     writeSuccessStories(stories);
