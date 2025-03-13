@@ -13,6 +13,7 @@ const CSV_FILE_PATH = 'data.csv';
 const JSON_FILE_PATH = 'data.json';
 const SUCCESS_REDIRECT_URL = process.env.SUCCESS_REDIRECT_URL;
 const PRICES_JSON_PATH = 'prices.json';
+const SUCCESS_STORIES_FILE = 'success_stories.json';
 
 app.use(express.json());
 
@@ -320,6 +321,53 @@ app.post('/create-payment', async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: 'Error procesando la solicitud', details: error.message });
     }
+});
+
+const readSuccessStories = () => {
+    if (!fs.existsSync(SUCCESS_STORIES_FILE)) return [];
+    return JSON.parse(fs.readFileSync(SUCCESS_STORIES_FILE));
+};
+
+const writeSuccessStories = (stories) => {
+    fs.writeFileSync(SUCCESS_STORIES_FILE, JSON.stringify(stories, null, 2));
+};
+
+app.post('/add-success-story', (req, res) => {
+    const { title, videoUrl } = req.body;
+    if (!title || !videoUrl) {
+        return res.status(400).json({ error: 'Faltan parámetros' });
+    }
+
+    let stories = readSuccessStories();
+    if (stories.length >= 2) {
+        return res.status(400).json({ error: 'Solo se pueden almacenar 2 historias de éxito.' });
+    }
+
+    stories.push({ title, videoUrl });
+    writeSuccessStories(stories);
+
+    res.json({ success: true, message: 'Historia de éxito agregada', stories });
+});
+
+app.put('/edit-success-story/:index', (req, res) => {
+    const index = parseInt(req.params.index);
+    const { title, videoUrl } = req.body;
+
+    let stories = readSuccessStories();
+    if (index < 0 || index >= stories.length) {
+        return res.status(404).json({ error: 'Historia de éxito no encontrada' });
+    }
+
+    if (title) stories[index].title = title;
+    if (videoUrl) stories[index].videoUrl = videoUrl;
+    
+    writeSuccessStories(stories);
+    res.json({ success: true, message: 'Historia de éxito actualizada', stories });
+});
+
+app.get('/get-success-stories', (req, res) => {
+    const stories = readSuccessStories();
+    res.json(stories);
 });
 
 app.listen(PORT, () => {
