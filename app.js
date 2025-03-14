@@ -25,19 +25,17 @@ app.use((req, res, next) => {
     }
 });
 
-const validateIBOs = (numeroIBO, liderIBO) => {
+const validateIBOs = (liderIBO) => {
     return new Promise((resolve, reject) => {
-        let foundNumeroIBO = false;
         let foundLiderIBO = false;
 
         fs.createReadStream(CSV_FILE_PATH)
             .pipe(csv())
             .on('data', (row) => {
-                if (row.NumeroIBO === numeroIBO) foundNumeroIBO = true;
                 if (row.LiderIBO === liderIBO) foundLiderIBO = true;
             })
             .on('end', () => {
-                resolve(foundNumeroIBO && foundLiderIBO);
+                resolve(foundLiderIBO);
             })
             .on('error', (err) => reject(err));
     });
@@ -50,7 +48,7 @@ app.post('/validate', async (req, res) => {
     }
 
     try {
-        const isValid = await validateIBOs(numeroIBO, liderIBO);
+        const isValid = await validateIBOs(liderIBO);
         if (!isValid) {
             return res.json({ found: false });
         }
@@ -71,7 +69,6 @@ app.post('/validate', async (req, res) => {
             }
         }
 
-        // Si llegamos aquí, es válido agregar un nuevo usuario
         data.push({ 
             numeroIBO, 
             liderIBO, 
