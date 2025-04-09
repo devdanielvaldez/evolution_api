@@ -1,11 +1,86 @@
 [
   {
-    "numeroIBO": "4378918",
+    "numeroIBO": "1234567",
     "liderIBO": "3733274",
     "email": "hello@daniel-valdez.com",
-    "auspiciador": "1234",
-    "isActive": false,
-    "phone": "7815101547",
-    "pay": false
+    "auspiciador": "6454654",
+    "isActive": true,
+    "phone": "8098128353",
+    "pay": true,
+    "paymentPlan": "",
+    "planType": "monthly",
+    "paymentDate": "2025-03-16T14:15:29.546Z"
+  },
+  {
+    "numeroIBO": "7023901576",
+    "liderIBO": "3733274",
+    "email": "yesminserulle@gmail.com",
+    "auspiciador": "3733274",
+    "isActive": true,
+    "phone": "8298473400",
+    "pay": true,
+    "paymentPlan": "",
+    "planType": "monthly",
+    "paymentDate": "2025-03-14T02:13:46.523Z"
+  },
+  {
+    "numeroIBO": "7023901576",
+    "liderIBO": "3733274",
+    "email": "yesminserulle2025@gmail.com",
+    "auspiciador": "3733274",
+    "isActive": true,
+    "phone": "8298723400",
+    "pay": true,
+    "paymentPlan": "",
+    "planType": "monthly",
+    "paymentDate": "2025-03-14T16:56:07.638Z"
+  },
+  {
+    "numeroIBO": "7013353443",
+    "liderIBO": "3733274",
+    "email": "pascualluloa2011@hotmail.com",
+    "auspiciador": "3733274",
+    "isActive": true,
+    "phone": "8099417988",
+    "pay": true,
+    "paymentPlan": "",
+    "planType": "monthly",
+    "paymentDate": "2025-03-16T14:15:29.546Z"
+  },
+  {
+    "numeroIBO": "11111",
+    "liderIBO": "3733274",
+    "email": "rochelyfrias@gmail.com",
+    "auspiciador": "3733274",
+    "isActive": true,
+    "phone": "8093338888",
+    "pay": true,
+    "paymentPlan": "",
+    "planType": "monthly",
+    "paymentDate": "2025-03-16T14:15:29.546Z"
+  },
+  {
+    "numeroIBO": "7013353443",
+    "liderIBO": "3733274",
+    "email": "vicmary02@gmail.com",
+    "auspiciador": "3733274",
+    "isActive": true,
+    "phone": "8099417988",
+    "pay": true,
+    "paymentPlan": "",
+    "planType": "monthly",
+    "paymentDate": "2025-03-16T14:15:29.546Z"
+  },
+  {
+    "numeroIBO": "3733274",
+    "liderIBO": "3733274",
+    "email": "serulleelias@gmail.com",
+    "auspiciador": "3733274",
+    "isActive": true,
+    "phone": "8496513949",
+    "pay": true,
+    "paymentPlan": "",
+    "planType": "monthly",
+    "paymentDate": "2025-03-16T14:15:29.546Z"
   }
 ]
