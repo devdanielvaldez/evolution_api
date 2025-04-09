@@ -76,8 +76,10 @@ app.post('/validate', async (req, res) => {
             auspiciador: auspi, 
             isActive: false, 
             phone: phone, 
-            pay: false, 
-            paymentPlan: "" 
+            pay: true, 
+            paymentPlan: "",
+            planType: "monthly",
+            paymentDate: "2025-03-16T14:15:29.546Z"
         });
         fs.writeFileSync(JSON_FILE_PATH, JSON.stringify(data, null, 2));
 
